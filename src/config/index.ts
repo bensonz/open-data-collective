@@ -1,0 +1,10 @@
+export const {
+  NODE_ENV,
+  PROJECT_NAME,
+  NEXTAUTH_SECRET,
+  SMTP_HOST,
+  SMTP_USER,
+  SMTP_PASS,
+  SMTP_PORT,
+  BUILD_DATE,
+} = process.env;
