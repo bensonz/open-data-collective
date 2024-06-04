@@ -1,8 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-export default async function middleware(req: NextRequest) {
-  return NextResponse.next();
-}
+const isProtectedRoute = createRouteMatcher(["/home(.*)"]);
+
+export default clerkMiddleware((auth, req) => {
+  if (isProtectedRoute(req)) auth().protect();
+});
 
 export const config = {
   matcher: [
@@ -20,5 +22,7 @@ export const config = {
      * - public (public routes)
      */
     "/((?!api|_next/static|_next/image|favicon.ico|images|icons|audio|locales|sw.js|public|robots.txt|sitemap.xml).*)",
+    "/",
+    "/(api|trpc)(.*)",
   ],
 };

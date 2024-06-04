@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { ClerkProvider } from "@clerk/nextjs";
 import { Next13ProgressBar } from "next13-progressbar";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,7 +17,9 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
         options={{ showSpinner: true }}
       />
       <AppDialogProvider>
-        <TooltipProvider>{children}</TooltipProvider>
+        <TooltipProvider>
+          <ClerkProvider>{children}</ClerkProvider>
+        </TooltipProvider>
       </AppDialogProvider>
     </>
   );
