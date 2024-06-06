@@ -50,7 +50,8 @@ import { Textarea } from "../ui/textarea";
 interface IFundDialogProps {
   data?: Fund;
   datasets?: Dataset[];
-  onSubmit: (fund: Partial<Fund>) => Promise<boolean>;
+  viewMode?: boolean;
+  onSubmit?: (fund: Partial<Fund>) => Promise<boolean>;
   children: React.ReactNode;
 }
 
@@ -81,6 +82,7 @@ const FormSchema = z.object({
 export default function FundDialog({
   data,
   datasets,
+  viewMode = false,
   onSubmit,
   children,
 }: IFundDialogProps) {
@@ -108,6 +110,7 @@ export default function FundDialog({
   }, [data, form]);
 
   const handleSubmit = async (formData: z.infer<typeof FormSchema>) => {
+    if (!onSubmit) return;
     setLoading(true);
     try {
       const success = await onSubmit(formData);
@@ -149,7 +152,12 @@ export default function FundDialog({
                     Name <span className="text-red-500">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input type="text" placeholder="Name of fund" {...field} />
+                    <Input
+                      type="text"
+                      placeholder="Name of fund"
+                      {...field}
+                      readOnly={viewMode}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -163,23 +171,34 @@ export default function FundDialog({
                   <FormLabel>
                     Dataset <span className="text-red-500">*</span>
                   </FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a dataset" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {datasets?.map((dataset) => (
-                        <SelectItem key={dataset.id} value={dataset.id}>
-                          {dataset.provider} | {dataset.type}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {viewMode ? (
+                    <Input
+                      type="text"
+                      value={
+                        datasets?.find((dataset) => dataset.id === field.value)
+                          ?.provider || "N/A"
+                      }
+                      readOnly
+                    />
+                  ) : (
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a dataset" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {datasets?.map((dataset) => (
+                          <SelectItem key={dataset.id} value={dataset.id}>
+                            {dataset.provider} | {dataset.type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
@@ -191,7 +210,11 @@ export default function FundDialog({
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Description of fund" {...field} />
+                    <Textarea
+                      placeholder="Description of fund"
+                      {...field}
+                      readOnly={viewMode}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -209,11 +232,12 @@ export default function FundDialog({
                     <Input
                       type="number"
                       placeholder="Target amount"
-                      value={field.value}
+                      value={field.value.toString()}
                       onChange={(e) => {
                         const value = parseInt(e.target.value);
                         field.onChange(value);
                       }}
+                      readOnly={viewMode}
                     />
                   </FormControl>
                   <FormMessage />
@@ -229,7 +253,12 @@ export default function FundDialog({
                     Currency <span className="text-red-500">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input type="text" placeholder="Currency" {...field} />
+                    <Input
+                      type="text"
+                      placeholder="Currency"
+                      {...field}
+                      readOnly={viewMode}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -248,62 +277,72 @@ export default function FundDialog({
                       type="number"
                       placeholder="Target people"
                       min={1}
-                      value={field.value}
+                      value={field.value.toString()}
                       onChange={(e) => {
                         const value = parseInt(e.target.value);
                         field.onChange(value);
                       }}
+                      readOnly={viewMode}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="expiresAt"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Expires At </FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-[240px] pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "PPP")
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                          <CalendarIcon className="ml-auto size-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) => date < new Date()}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <FormLabel>Expires At</FormLabel>
+                  {viewMode ? (
+                    <Input
+                      type="text"
+                      value={field.value ? format(field.value, "PPP") : ""}
+                      readOnly
+                    />
+                  ) : (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-[240px] pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                            <CalendarIcon className="ml-auto size-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) => date < new Date()}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <DialogFooter>
-              <Button type="submit" form="fund-form" loading={loading}>
-                Submit
-              </Button>
-            </DialogFooter>
+            {!viewMode && (
+              <DialogFooter>
+                <Button type="submit" form="fund-form" loading={loading}>
+                  Submit
+                </Button>
+              </DialogFooter>
+            )}
           </form>
         </Form>
       </DialogContent>

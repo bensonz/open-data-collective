@@ -49,6 +49,7 @@ export async function POST(request: Request) {
       targetPeople: Number(targetPeople),
       currency,
       expiresAt: expiresAt ? new Date(expiresAt) : undefined,
+      subscribers: [uid],
     },
   });
   return NextResponse.json(data);
