@@ -11,10 +11,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// User model
+// User is handled by Clerk
+// https://clerk.com/docs/reference/backend-api/tag/Users#operation/GetUser
+
+enum EnumIntervalUnit {
+  DAY
+  WEEK
+  MONTH
+  YEAR
+}
+
 model Dataset {
   id       String @id @default(cuid())
   provider String
   type     String
+
+  recurring    Boolean           @default(false)
+  interval     Int?
+  intervalUnit EnumIntervalUnit?
 
   url      String?
   metadata Json?
@@ -23,10 +38,6 @@ model Dataset {
   updatedAt DateTime @updatedAt
   Fund      Fund[]
 }
-
-// User model
-// User is handled by Clerk
-// https://clerk.com/docs/reference/backend-api/tag/Users#operation/GetUser
 
 enum EnumFundStatus {
   PROPOSED // initial state
