@@ -1,6 +1,7 @@
 import { prismaClient } from "@/backend/client";
 import { currentUser } from "@clerk/nextjs/server";
 
+import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -39,11 +40,16 @@ export default async function HomePage() {
             <CardHeader>
               <CardTitle>{fund.name}</CardTitle>
               <CardDescription>{fund.description}</CardDescription>
-              <Badge className="w-32">{fund.status}</Badge>
+              <Badge
+                className={cn("w-32", {
+                  "bg-green-500": fund.status === "APPROVED",
+                })}
+              >
+                {fund.status}
+              </Badge>
               <Progress
                 className="h-2"
-                value={fund.subscribers.length}
-                max={fund.targetPeople || 0}
+                value={(fund.subscribers.length / fund.targetPeople) * 100}
               ></Progress>
               <div className="flex w-full justify-between">
                 <p className="text-xs text-muted-foreground md:text-sm">

@@ -3,6 +3,7 @@ import { prismaClient } from "@/backend/client";
 import logger from "@/backend/logger";
 import { uuidv4 } from "@/util/uuid";
 import { auth } from "@clerk/nextjs/server";
+import { EnumFundStatus } from "@prisma/client";
 
 // ROUTE -- /api/feedback
 
@@ -37,7 +38,7 @@ export async function POST(request: Request) {
     currency,
     expiresAt,
   } = await request.json();
-
+  const tp = Number(targetPeople);
   const data = await prismaClient.fund.create({
     data: {
       id: `fund-${uuidv4()}`,
@@ -46,7 +47,8 @@ export async function POST(request: Request) {
       description,
       datasetId,
       targetAmount: Number(targetAmount),
-      targetPeople: Number(targetPeople),
+      targetPeople: tp,
+      status: tp > 1 ? EnumFundStatus.PROPOSED : EnumFundStatus.APPROVED,
       statusUpdatedAt: new Date(),
       currency,
       expiresAt: expiresAt ? new Date(expiresAt) : undefined,

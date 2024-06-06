@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prismaClient } from "@/backend/client";
+import { FundController } from "@/backend/controllers/fund-controller";
 import { auth } from "@clerk/nextjs/server";
+import { EnumFundStatus } from "@prisma/client";
 
 interface IParams {
   params: {
@@ -20,15 +22,6 @@ export async function POST(req: NextRequest, { params }: IParams) {
   if (!fund) {
     return NextResponse.json({ error: "Fund not found" }, { status: 404 });
   }
-  if (fund.subscribers.includes(userId)) {
-    return NextResponse.json({ success: true, message: "User already joined" });
-  }
-  await prismaClient.fund.update({
-    where: { id: fid },
-    data: { subscribers: { push: userId } },
-  });
-  return NextResponse.json({
-    success: true,
-    message: "User joined successfully",
-  });
+  const result = await FundController.join(fund, userId);
+  return NextResponse.json(result);
 }
