@@ -1,8 +1,8 @@
 const { PrismaClient, EnumIntervalUnit } = require("@prisma/client");
-const prisma = new PrismaClient();
+const prismaClient = new PrismaClient();
 
 async function applySeed() {
-  await prisma.dataset.createMany({
+  await prismaClient.dataset.createMany({
     data: [
       {
         provider: "People Data Labs",
@@ -33,7 +33,7 @@ async function applySeed() {
 }
 
 async function resetSeed() {
-  await prisma.dataset.deleteMany({});
+  await prismaClient.dataset.deleteMany({});
   console.log("All seed data has been removed successfully!");
 }
 
