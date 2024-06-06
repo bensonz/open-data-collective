@@ -10,3 +10,95 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Dataset {
+  id       String @id @default(cuid())
+  provider String
+  type     String
+
+  url      String?
+  metadata Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Fund      Fund[]
+}
+
+// User model
+// User is handled by Clerk
+// https://clerk.com/docs/reference/backend-api/tag/Users#operation/GetUser
+
+enum EnumFundStatus {
+  PROPOSED // initial state
+  IN_PROGRESS // collecting funds
+  APPROVED // Fully subscribed
+  LOCKED // Enough people, but havne't paid
+  COLLECTED // Fully paid
+  PUCHASED // Fully paid and dataset purchased
+
+  CANCELLED // Cancelled by creator
+  REJECTED // Rejected by admin
+  FAILED // Failed to collect funds
+}
+
+model Fund {
+  id        String @id
+  creatorId String
+
+  name         String
+  description  String?
+  targetAmount Float?
+  targetPeople Int?
+  currency     String?
+  // each = targetAmount / targetPeople
+
+  status          EnumFundStatus @default(PROPOSED)
+  statusUpdatedAt DateTime?
+
+  subscribers String[] // user ids
+
+  expiresAt DateTime?
+
+  dataset   Dataset @relation(fields: [datasetId], references: [id])
+  datasetId String
+
+  PaymentOrder PaymentOrder[]
+}
+
+enum EnumPaymentStatus {
+  CREATED
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  CANCELLED
+
+  REFUND_INPROGRESS
+  FULLY_REFUNDED
+  REFUND_FAILED
+
+  AUTH_UPDATING
+  AUTH_SUCCESS
+  AUTH_FAILED
+
+  WAIT_FOR_NOTIFICATION
+}
+
+model PaymentOrder {
+  id        String @id
+  creatorId String
+
+  amountCents   Int // amount in lowest currency unit, e.g. cents in USD
+  currency      String? // 3 letter currency code, e.g. USD, EUR, CNY
+  paidBy        String? // payment gateway, e.g. stripe, bank transfer
+  notes         String? // additional notes
+  transactionId String? // stripe transaction id
+
+  currentStatus          EnumPaymentStatus @default(CREATED)
+  currentStatusUpdatedAt DateTime?
+
+  targetStatus          EnumPaymentStatus @default(COMPLETED)
+  targetStatusUpdatedAt DateTime?
+
+  fund   Fund   @relation(fields: [fundId], references: [id])
+  fundId String
+}
