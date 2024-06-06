@@ -74,6 +74,9 @@ model Fund {
   datasetId String
 
   PaymentOrder PaymentOrder[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum EnumPaymentStatus {

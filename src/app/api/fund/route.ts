@@ -47,6 +47,7 @@ export async function POST(request: Request) {
       datasetId,
       targetAmount: Number(targetAmount),
       targetPeople: Number(targetPeople),
+      statusUpdatedAt: new Date(),
       currency,
       expiresAt: expiresAt ? new Date(expiresAt) : undefined,
       subscribers: [uid],
