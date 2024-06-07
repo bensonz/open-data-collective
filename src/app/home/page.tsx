@@ -1,8 +1,10 @@
+import Link from "next/link";
 import { prismaClient } from "@/backend/client";
 import { currentUser } from "@clerk/nextjs/server";
 
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -14,7 +16,6 @@ import {
 import { Progress } from "@/components/ui/progress";
 import Empty from "@/components/common/empty";
 import { SpacingVertical } from "@/components/common/spacer";
-import DetailButton from "@/components/home/detail-button";
 import JoinButton from "@/components/home/join-button";
 import NewFundButton from "@/components/home/new-fund-button";
 
@@ -23,7 +24,9 @@ export default async function HomePage() {
   if (!user) {
     return <div>Unauthorized</div>;
   }
-  const funds = await prismaClient.fund.findMany();
+  const funds = await prismaClient.fund.findMany({
+    orderBy: { createdAt: "desc" },
+  });
   const datasets = await prismaClient.dataset.findMany();
   return (
     <div className="container">
@@ -70,7 +73,9 @@ export default async function HomePage() {
               <p>Expires: {fund.expiresAt?.toLocaleDateString()}</p>
             </CardContent>
             <CardFooter className="space-x-2">
-              <DetailButton datasets={datasets} fund={fund} />
+              <Link href={`/home/fund/${fund.id}`} passHref>
+                <Button variant="outline">View</Button>
+              </Link>
               <JoinButton user={user.id} fund={fund} />
             </CardFooter>
           </Card>
