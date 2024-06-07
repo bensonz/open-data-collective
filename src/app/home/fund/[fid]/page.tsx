@@ -103,18 +103,6 @@ export default async function FundDetailPage({
                     {fund.expiresAt?.toLocaleDateString()}
                   </div>
                 </div>
-                <div>
-                  <Label>Related Dataset</Label>
-                  <div className="font-medium">
-                    {fund.dataset.url ? (
-                      <Link href="#" className="text-blue-600 underline">
-                        Startup Funding Data
-                      </Link>
-                    ) : (
-                      "No dataset URL"
-                    )}
-                  </div>
-                </div>
               </div>
             </CardContent>
           </Card>
@@ -266,6 +254,45 @@ export default async function FundDetailPage({
                     className="h-2"
                     value={(fund.subscribers.length / fund.targetPeople) * 100}
                   ></Progress>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Dataset Info</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Provider</Label>
+                  <div className="font-medium">{fund.dataset.provider}</div>
+                </div>
+                <div>
+                  <Label>Category</Label>
+                  <div className="font-medium">{fund.dataset.type}</div>
+                </div>
+                <div>
+                  <Label>URL</Label>
+                  <div className="font-medium">
+                    {fund.dataset.url ? (
+                      <Link href="#" className="text-blue-600 underline">
+                        Startup Funding Data
+                      </Link>
+                    ) : (
+                      "No dataset URL"
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <Label>Recurring</Label>
+                  <div className="font-medium">
+                    {fund.dataset.recurring ? "Yes" : "No"}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {fund.dataset.interval}
+                    {fund.dataset.intervalUnit}
+                  </div>
                 </div>
               </div>
             </CardContent>
